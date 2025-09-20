@@ -31,22 +31,20 @@ def extract_text(file):
 # --- LLM Call to Hugging Face ---
 def get_feedback_from_llm(jd, resume):
     prompt = f"""
-Compare the following resume and job description.
+Compare this resume to the job description and give:
+- A match score from 0 to 100
+- Missing keywords or skills
+- Suggestions to improve the resume
+- Areas where the resume aligns well
 
 Job Description:
 {jd}
 
 Resume:
 {resume}
-
-Give:
-1. Match percentage (0–100)
-2. Missing keywords or skills
-3. Suggestions to improve resume
-4. Highlight strong alignment areas
 """
     response = requests.post(
-        "https://api-inference.huggingface.co/models/google/flan-t5-large",
+        "https://api-inference.huggingface.co/models/google/flan-t5-base",
         headers={"Content-Type": "application/json"},
         json={"inputs": prompt}
     )

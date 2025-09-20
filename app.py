@@ -31,7 +31,7 @@ def extract_text(file):
 # --- LLM Call to Hugging Face ---
 def get_feedback_from_llm(jd, resume):
     prompt = f"""
-You are a resume screening assistant. Compare the following resume and job description.
+Compare the following resume and job description.
 
 Job Description:
 {jd}
@@ -39,25 +39,24 @@ Job Description:
 Resume:
 {resume}
 
+Give:
 1. Match percentage (0–100)
 2. Missing keywords or skills
 3. Suggestions to improve resume
 4. Highlight strong alignment areas
-
-Respond in structured markdown.
 """
     response = requests.post(
-        "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1",
+        "https://api-inference.huggingface.co/models/google/flan-t5-large",
         headers={"Content-Type": "application/json"},
         json={"inputs": prompt}
     )
 
     try:
         output = response.json()
-        if isinstance(output, list) and 'generated_text' in output[0]:
-            return output[0]['generated_text']
-        elif isinstance(output, dict) and 'generated_text' in output:
+        if 'generated_text' in output:
             return output['generated_text']
+        elif isinstance(output, list) and 'generated_text' in output[0]:
+            return output[0]['generated_text']
         else:
             return "⚠️ No response generated. Try simplifying the resume or JD."
     except Exception as e:

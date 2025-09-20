@@ -3,6 +3,7 @@ import pdfplumber
 from docx import Document
 import requests
 
+# --- Page Setup ---
 st.set_page_config(page_title="Resume Scanner AI", page_icon="🧠")
 st.title("🧠 Resume Scanner AI")
 st.write("Paste the Job Description and upload your Resume to get AI-powered feedback.")
@@ -45,8 +46,15 @@ Respond in structured markdown.
         headers={"Content-Type": "application/json"},
         json={"inputs": prompt}
     )
+
     try:
-        return response.json()[0]['generated_text']
+        output = response.json()
+        if isinstance(output, list) and 'generated_text' in output[0]:
+            return output[0]['generated_text']
+        elif isinstance(output, dict) and 'generated_text' in output:
+            return output['generated_text']
+        else:
+            return "⚠️ No response generated. Try simplifying the resume or JD."
     except Exception as e:
         return f"⚠️ Error fetching response: {e}"
 
@@ -59,4 +67,4 @@ if st.button("🚀 Analyze Match"):
             resume_text = extract_text(resume_file)
             feedback = get_feedback_from_llm(job_description, resume_text)
             st.markdown("### 📊 Match Analysis")
-            st.markdown(feedback)
+            st.markdown(feedback if feedback else "⚠️ No feedback received. Try again with a shorter resume or JD.")
